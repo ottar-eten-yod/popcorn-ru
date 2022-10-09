@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Processors\ForumProcessor;
 use App\Processors\SyncProcessor;
+use App\Repository\AnimeRepository;
 use App\Repository\MovieRepository;
 use App\Repository\ShowRepository;
 use App\Repository\TorrentRepository;
@@ -84,6 +85,15 @@ class SyncCommand extends Command
         foreach ($movies as $movie) {
             $this->sendDelayed(
                 new Message(json_encode(['type' => 'movie', 'id' => $movie->getId()->toString()]))
+            );
+        }
+
+        $animes = $this->animeRepository->getOld($dateCheck, $limit);
+
+        $this->logger->info('Update old animes', ['count' => count($animes)]);
+        foreach ($animes as $anime) {
+            $this->sendDelayed(
+                new Message(json_encode(['type' => 'anime', 'id' => $anime->getId()->toString()]))
             );
         }
 

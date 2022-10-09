@@ -2,21 +2,19 @@
 
 namespace App\Entity;
 
+use App\Entity\Episode\AnimeEpisode;
 use App\Entity\Episode\Episode;
-use App\Entity\Episode\ShowEpisode;
-use App\Entity\Locale\ShowLocale;
-use App\Entity\Torrent\BaseTorrent;
-use App\Entity\Torrent\ShowTorrent;
+use App\Entity\Locale\AnimeLocale;
+use App\Entity\Torrent\AnimeTorrent;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Generator;
 
 /**
- * @ORM\Table(name="shows")
- * @ORM\Entity(repositoryClass="App\Repository\ShowRepository")
+ * @ORM\Table(name="anime")
+ * @ORM\Entity(repositoryClass="App\Repository\AnimeRepository")
  */
-class Show extends BaseMedia
+class Anime extends BaseMedia
 {
     public function __construct()
     {
@@ -25,43 +23,24 @@ class Show extends BaseMedia
         $this->episodes = new ArrayCollection();
     }
 
-    public function syncTranslations(): self {
-        $translations = [];
-        foreach ($this->getTorrents() as $tor) {
-            if ($tor->getActive()) {
-                $translations[$tor->getLanguage()] = 1;
-            }
-        }
-        foreach ($this->getEpisodes() as $episode) {
-            foreach ($episode->getTorrents() as $tor) {
-                if ($tor->getActive()) {
-                    $translations[$tor->getLanguage()] = 1;
-                }
-            }
-        }
-        $this->existTranslations = array_keys($translations);
-        sort($this->existTranslations);
-        return $this;
-    }
-
     /**
-     * @var ShowTorrent[]&Collection
-     * @ORM\OneToMany(targetEntity="App\Entity\Torrent\ShowTorrent", fetch="LAZY", mappedBy="show")
+     * @var AnimeTorrent[]&Collection
+     * @ORM\OneToMany(targetEntity="App\Entity\Torrent\AnimeTorrent", fetch="EAGER", mappedBy="anime")
      * @ORM\OrderBy({"peer" = "DESC"})
      */
     protected $torrents;
     public function getTorrents() { return $this->torrents; }
 
     /**
-     * @var ShowLocale[]
-     * @ORM\OneToMany(targetEntity="App\Entity\Locale\ShowLocale", fetch="LAZY", mappedBy="media")
+     * @var AnimeLocale[]
+     * @ORM\OneToMany(targetEntity="App\Entity\Locale\AnimeLocale", fetch="EAGER", mappedBy="media")
      */
     protected $locales;
     public function getLocales() { return $this->locales; }
 
     /**
-     * @var ShowEpisode[]&Collection
-     * @ORM\OneToMany(targetEntity="App\Entity\Episode\ShowEpisode", mappedBy="show")
+     * @var AnimeEpisode[]&Collection
+     * @ORM\OneToMany(targetEntity="App\Entity\Episode\AnimeEpisode", mappedBy="show")
      */
     protected $episodes;
     public function getEpisodes() { return $this->episodes; }
@@ -80,14 +59,6 @@ class Show extends BaseMedia
     protected $imdb;
     public function getImdb() { return $this->imdb; }
     public function setImdb($imdb) { $this->imdb = $imdb; return $this;}
-
-    /**
-     * @var integer
-     * @ORM\Column(type="integer")
-     */
-    protected $tmdb;
-    public function getTmdb() { return $this->tmdb; }
-    public function setTmdb($tmdb) { $this->tmdb = $tmdb; return $this;}
 
     /**
      * @var string
@@ -154,12 +125,39 @@ class Show extends BaseMedia
     public function setNumSeasons($numSeasons) { $this->numSeasons = $numSeasons; return $this;}
 
     /**
-     * @var \DateTime
-     * @ORM\Column(type="datetime", nullable=true)
+     * @var integer
+     * @ORM\Column(type="integer")
      */
     protected $lastUpdated;
     public function getLastUpdated() { return $this->lastUpdated; }
     public function setLastUpdated($lastUpdated) { $this->lastUpdated = $lastUpdated; return $this;}
+
+    //</editor-fold>
+
+    //<editor-fold desc="Anime Api Data">
+    /**
+     * @var string
+     * @ORM\Column(type="string", unique=true)
+     */
+    protected $kitsu;
+    public function getKitsu() { return $this->kitsu; }
+    public function setKitsu($kitsu) { $this->kitsu = $kitsu; return $this;}
+
+    /**
+     * @var string
+     * @ORM\Column(type="string")
+     */
+    protected $mal;
+    public function getMal() { return $this->mal; }
+    public function setMal($mal) { $this->mal = $mal; return $this;}
+
+    /**
+     * @var string
+     * @ORM\Column(type="string")
+     */
+    protected $type;
+    public function getType() { return $this->type; }
+    public function setType($type) { $this->type = $type; return $this;}
 
     //</editor-fold>
 }
